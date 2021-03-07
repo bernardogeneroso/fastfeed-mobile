@@ -3,6 +3,8 @@ import React from 'react';
 import {StatusBar} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 
+import AppProvider from './hooks';
+
 import Routes from './routes';
 
 const App = () => {
@@ -10,7 +12,9 @@ const App = () => {
     <NavigationContainer>
       <StatusBar backgroundColor="#4C32CC" barStyle="default" animated />
 
-      <Routes />
+      <AppProvider>
+        <Routes />
+      </AppProvider>
     </NavigationContainer>
   );
 };

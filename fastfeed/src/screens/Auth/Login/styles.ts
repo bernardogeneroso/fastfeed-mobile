@@ -1,29 +1,24 @@
 import styled from 'styled-components/native';
 import {RectButton} from 'react-native-gesture-handler';
+import {CheckBox} from 'react-native-elements';
+
+import logoTransparent from '../../../../assets/images/logos/logo_transparent.png';
 
 interface ContainerInputProps {
   focus: boolean;
 }
 
-export const Container = styled.ImageBackground`
+interface CheckBoxTextProps {
+  checked: boolean;
+}
+
+export const Container = styled.ImageBackground.attrs({
+  source: logoTransparent,
+})`
   flex: 1;
   padding: 30px;
   background-color: #4c32cc;
 `;
-
-export const Header = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
-`;
-
-export const HeaderImageLogo = styled.Image`
-  width: 40px;
-  height: 44px;
-`;
-
-export const HeaderImageLogoName = styled.Image``;
 
 export const Content = styled.View``;
 
@@ -49,6 +44,7 @@ export const InformationText = styled.Text`
   font-size: 15px;
   color: #d5ccff;
   margin-top: 10px;
+  margin-bottom: 10px;
   width: 160px;
 `;
 
@@ -58,10 +54,10 @@ export const ContainerInput = styled.View<ContainerInputProps>`
   border-width: 2px;
   border-color: ${(props) => (props.focus ? '#FFC042' : 'transparent')};
   height: 56px;
-  margin-bottom: 14px;
   flex-direction: row;
   align-items: center;
   padding: 4px 18px;
+  margin-bottom: 8px;
 `;
 
 export const Divider = styled.View`
@@ -78,13 +74,53 @@ export const Input = styled.TextInput`
 
 export const ContainerEye = styled.TouchableOpacity``;
 
+export const ContainerError = styled.View`
+  flex: 1;
+  margin-top: -4px;
+  margin-bottom: 4px;
+  align-items: flex-end;
+  padding: 0 2px;
+`;
+
+export const ErrorText = styled.Text`
+  color: #ffc042;
+`;
+
+export const ContainerSettingsForm = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 4px 4px -8px;
+`;
+
+export const ContentCheckBox = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+export const CheckBoxData = styled(CheckBox)`
+  margin-right: 8px;
+`;
+
+export const CheckBoxText = styled.Text<CheckBoxTextProps>`
+  font-size: 13px;
+  color: ${(props) => (props.checked ? '#ffc042' : '#d5ccff')};
+`;
+
+export const ButtonForgetPassword = styled.TouchableOpacity``;
+
+export const ForgetPasswordText = styled.Text`
+  font-size: 13px;
+  color: #d5ccff;
+`;
+
 export const ButtonSubmit = styled(RectButton)`
   background: #ffc042;
   border-radius: 4px;
   height: 56px;
   justify-content: center;
   align-items: center;
-  margin-top: 6px;
+  margin-top: 8px;
 `;
 
 export const ButtonSubmitText = styled.Text`

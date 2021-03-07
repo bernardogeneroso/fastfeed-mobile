@@ -12,6 +12,7 @@ const Stack = createStackNavigator();
 
 type AuthScreens = {
   Login: undefined;
+  ForgetPassword: undefined;
 };
 
 type StackNavigatorScreens = {

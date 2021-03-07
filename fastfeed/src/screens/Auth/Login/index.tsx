@@ -1,18 +1,22 @@
 import React, {useRef, useEffect, useState, useCallback} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import {
   KeyboardAvoidingView,
   Keyboard,
   ScrollView,
   Platform,
-  Animated,
+  Alert,
+  KeyboardEventName,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import * as Yup from 'yup';
+
+import Header from '../../../components/Auth/Header';
+import {AppRoutesScreens} from '../../../routes/app.routes';
+import getValidationErrors from '../../../utils/getValidationErrors';
 
 import {
   Container,
-  Header,
-  HeaderImageLogo,
-  HeaderImageLogoName,
   Content,
   WelcomeText,
   WelcomeStyleText,
@@ -21,7 +25,15 @@ import {
   ContainerInput,
   Divider,
   Input,
+  ContainerError,
+  ErrorText,
   ContainerEye,
+  ContainerSettingsForm,
+  ContentCheckBox,
+  CheckBoxData,
+  CheckBoxText,
+  ButtonForgetPassword,
+  ForgetPasswordText,
   ButtonSubmit,
   ButtonSubmitText,
 } from './styles';
@@ -30,62 +42,80 @@ interface FormProps {
   email: {
     value: string;
     focusable: boolean;
+    error: {
+      message: string | undefined;
+    };
   };
   password: {
     value: string;
     focusable: boolean;
     visible: boolean;
+    error: {
+      message: string | undefined;
+    };
   };
+  checkbox: boolean;
 }
 
-import logoTransparent from '../../../../assets/images/logos/logo_transparent.png';
-import logo from '../../../../assets/images/logos/logo.png';
-import logoName from '../../../../assets/images/logos/logo_name.png';
+interface KeyboardListenerProps {
+  show: KeyboardEventName;
+  hide: KeyboardEventName;
+}
 
 const Login = () => {
-  const formRef = useRef(null);
-  const opacityWelcomeMessage = new Animated.Value(1);
+  const navigation = useNavigation<AppRoutesScreens>();
 
-  const [keyboardStatus, setKeyboardStatus] = useState<boolean>(false);
+  const formRef = useRef(null);
+
+  const [keyboardShow, setKeyboardShow] = useState<boolean>(false);
   const [form, setForm] = useState<FormProps>({
     email: {
       value: '',
       focusable: false,
+      error: {
+        message: undefined,
+      },
     },
     password: {
       value: '',
       focusable: false,
       visible: false,
+      error: {
+        message: undefined,
+      },
     },
+    checkbox: false,
   });
+  const keyboardListener: KeyboardListenerProps =
+    Platform.OS === 'ios'
+      ? {
+          show: 'keyboardWillShow',
+          hide: 'keyboardWillHide',
+        }
+      : {
+          show: 'keyboardDidShow',
+          hide: 'keyboardDidHide',
+        };
 
   useEffect(() => {
-    Keyboard.addListener('keyboardDidShow', keyboardWillShow);
-    Keyboard.addListener('keyboardDidHide', keyboardWillHide);
+    Keyboard.addListener(keyboardListener.show, () => setKeyboardShow(true));
+    Keyboard.addListener(keyboardListener.hide, () => setKeyboardShow(false));
 
     return () => {
-      Keyboard.removeListener('keyboardDidShow', keyboardWillShow);
-      Keyboard.removeListener('keyboardDidHide', keyboardWillHide);
+      // @ts-ignore
+      Keyboard.removeAllListeners(() => {
+        setKeyboardShow(true);
+
+        return keyboardListener.show;
+      });
+      // @ts-ignore
+      Keyboard.removeAllListeners(() => {
+        setKeyboardShow(false);
+
+        return keyboardListener.hide;
+      });
     };
-  }, []);
-
-  const keyboardWillShow = (event: any) => {
-    console.log('keyboardWillShow');
-    Animated.timing(opacityWelcomeMessage, {
-      duration: 400,
-      toValue: 0,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const keyboardWillHide = (event: any) => {
-    console.log('keyboardWillHide');
-    Animated.timing(opacityWelcomeMessage, {
-      duration: 400,
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
-  };
+  }, [keyboardListener.hide, keyboardListener.show]);
 
   const handleToggleVisiblePassword = useCallback(() => {
     setForm((state) => ({
@@ -111,50 +141,102 @@ const Login = () => {
   );
 
   const handleToggleChangeFocusable = useCallback(
-    (type: 'email' | 'password', focusable: boolean) => {
+    (type: 'email' | 'password') => {
       setForm((state) => ({
         ...state,
         [type]: {
           ...state[type],
-          focusable: !focusable,
+          focusable: !state[type].focusable,
         },
       }));
     },
     [],
   );
 
-  const handleSubmit = useCallback(() => {}, []);
+  const handleSetMesssageErrorForm = useCallback(
+    (type: 'email' | 'password', message: string) => {
+      setForm((state) => ({
+        ...state,
+        [type]: {
+          ...state[type],
+          error: {
+            ...state[type].error,
+            message,
+          },
+        },
+      }));
+    },
+    [],
+  );
+
+  const handleToggleCheckBoxForm = useCallback(() => {
+    setForm((state) => ({
+      ...state,
+      checkbox: !state.checkbox,
+    }));
+  }, []);
+
+  const handleRedirectForgetPassword = useCallback(() => {
+    // @ts-ignore
+    navigation.navigate('ForgetPassword');
+  }, [navigation]);
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      const schema = Yup.object().shape({
+        email: Yup.string()
+          .required('O campo de e-mail é obrigatório')
+          .email('Escreva o e-mail válido'),
+        password: Yup.string().required('O campo da password é obrigatório'),
+      });
+
+      const data = {
+        email: form.email.value,
+        password: form.password.value,
+      };
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+
+        handleSetMesssageErrorForm('email', errors.email);
+        handleSetMesssageErrorForm('password', errors.password);
+
+        return;
+      }
+
+      Alert.alert('Error in authentication');
+    }
+  }, [form.email.value, form.password.value, handleSetMesssageErrorForm]);
 
   return (
     <Container
-      source={logoTransparent}
       imageStyle={{
         width: 250,
         height: 420,
         resizeMode: 'stretch',
       }}>
-      <Header>
-        <HeaderImageLogo source={logo} />
-        <HeaderImageLogoName source={logoName} />
-      </Header>
-
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{
+          flex: 1,
+        }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         enabled>
+        <Header />
         <ScrollView
-          contentContainerStyle={{flex: 1, justifyContent: 'space-around'}}
-          keyboardShouldPersistTaps="handled">
+          contentContainerStyle={{flexGrow: 1, justifyContent: 'space-around'}}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
           <Content>
-            <Animated.View
-              style={{
-                opacity: opacityWelcomeMessage,
-              }}>
+            {!keyboardShow && (
               <WelcomeText>
                 <WelcomeStyleText>Empregador,</WelcomeStyleText> seja bem vindo
                 a aplicação
               </WelcomeText>
-            </Animated.View>
+            )}
 
             <InformationText>
               Faça o login para gerir as suas entregas.
@@ -162,10 +244,10 @@ const Login = () => {
           </Content>
 
           <Form ref={formRef}>
-            <ContainerInput focus={!form.email.focusable}>
+            <ContainerInput focus={!!form.email.focusable}>
               <Icon
-                name="user"
-                color={!form.email.focusable ? '#FFC042' : '#4c32cc'}
+                name="mail"
+                color={form.email.focusable ? '#FFC042' : '#4c32cc'}
                 size={20}
               />
               <Divider />
@@ -176,28 +258,33 @@ const Login = () => {
                 returnKeyType="next"
                 placeholder="E-mail"
                 onChangeText={(value) => handleChangeInputValue('email', value)}
-                onFocus={() => handleToggleChangeFocusable('email', true)}
-                onBlur={() => handleToggleChangeFocusable('email', false)}
+                onFocus={() => handleToggleChangeFocusable('email')}
+                onBlur={() => handleToggleChangeFocusable('email')}
                 defaultValue={form.email.value}
               />
             </ContainerInput>
+            {form.email.error.message && (
+              <ContainerError>
+                <ErrorText>{form.email.error.message}</ErrorText>
+              </ContainerError>
+            )}
 
-            <ContainerInput focus={!form.password.focusable}>
+            <ContainerInput focus={!!form.password.focusable}>
               <Icon
                 name="lock"
-                color={!form.password.focusable ? '#FFC042' : '#4c32cc'}
+                color={form.password.focusable ? '#FFC042' : '#4c32cc'}
                 size={20}
               />
               <Divider />
               <Input
                 secureTextEntry={!form.password.visible}
                 returnKeyType="send"
-                placeholder="Palavra-passe"
+                placeholder="Password"
                 onChangeText={(value) =>
                   handleChangeInputValue('password', value)
                 }
-                onFocus={() => handleToggleChangeFocusable('password', true)}
-                onBlur={() => handleToggleChangeFocusable('password', false)}
+                onFocus={() => handleToggleChangeFocusable('password')}
+                onBlur={() => handleToggleChangeFocusable('password')}
                 defaultValue={form.password.value}
               />
               <ContainerEye onPress={handleToggleVisiblePassword}>
@@ -208,8 +295,34 @@ const Login = () => {
                 )}
               </ContainerEye>
             </ContainerInput>
+            {form.password.error.message && (
+              <ContainerError>
+                <ErrorText>{form.password.error.message}</ErrorText>
+              </ContainerError>
+            )}
 
-            <ButtonSubmit>
+            <ContainerSettingsForm>
+              <ContentCheckBox>
+                <CheckBoxData
+                  checked={form.checkbox}
+                  onPress={handleToggleCheckBoxForm}
+                  checkedColor="#ffc042"
+                  containerStyle={{
+                    margin: 0,
+                    padding: 0,
+                  }}
+                />
+                <CheckBoxText checked={form.checkbox}>Lembrar-me</CheckBoxText>
+              </ContentCheckBox>
+
+              <ButtonForgetPassword>
+                <ForgetPasswordText onPress={handleRedirectForgetPassword}>
+                  Esqueci-me da minha senha
+                </ForgetPasswordText>
+              </ButtonForgetPassword>
+            </ContainerSettingsForm>
+
+            <ButtonSubmit onPress={handleSubmit}>
               <ButtonSubmitText>Entrar</ButtonSubmitText>
             </ButtonSubmit>
           </Form>

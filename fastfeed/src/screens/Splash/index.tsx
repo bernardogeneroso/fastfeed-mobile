@@ -10,14 +10,6 @@ const Splash = () => {
   const navigation = useNavigation<AppRoutesScreens>();
   const scale = new Animated.Value(1);
 
-  useEffect(() => {
-    handleMultiScale();
-
-    setTimeout(function () {
-      navigation.navigate('Auth');
-    }, 4000);
-  }, []);
-
   const handleMultiScale = useCallback(() => {
     Animated.loop(
       Animated.sequence([
@@ -35,7 +27,16 @@ const Splash = () => {
     ).start(() => {
       handleMultiScale();
     });
-  }, []);
+  }, [scale]);
+
+  useEffect(() => {
+    handleMultiScale();
+
+    setTimeout(function () {
+      // @ts-ignore
+      navigation.navigate('Auth');
+    }, 4000);
+  }, [navigation, handleMultiScale]);
 
   return (
     <View style={styles.container}>
