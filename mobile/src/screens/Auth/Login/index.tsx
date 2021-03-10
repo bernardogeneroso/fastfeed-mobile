@@ -9,6 +9,7 @@ import {
   KeyboardEventName,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import * as Animatable from 'react-native-animatable';
 import * as Yup from 'yup';
 
 import Header from '../../../components/Auth/Header';
@@ -237,6 +238,8 @@ const Login = () => {
                 a aplicação
               </WelcomeText>
             )}
+
+            <Animatable.View></Animatable.View>
 
             <InformationText>
               Faça o login para gerir as suas entregas.

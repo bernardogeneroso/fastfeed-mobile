@@ -1,0 +1,16 @@
+{
+  "type": "postgres",
+  "host": "postgresql-20795-0.cloudclusters.net",
+  "port": 20795,
+  "username": "postgres_admin",
+  "password": "docker123",
+  "database": "fastfeed",
+  "synchronize": true,
+  "logging": false,
+  "entities": ["./src/modules/**/typeorm/entity/*.ts"],
+  "migrations": ["./src/shared/typeorm/migrations/*.ts"],
+  "cli": {
+    "entitiesDir": "./src/modules/**/typeorm/entity/*.ts",
+    "migrationsDir": "./src/shared/typeorm/migrations/*.ts"
+  }
+}

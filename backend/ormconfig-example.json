@@ -1,0 +1,16 @@
+{
+  "type": "postgres",
+  "host": "test",
+  "port": 20795,
+  "username": "test",
+  "password": "test",
+  "database": "fastfeed",
+  "synchronize": true,
+  "logging": false,
+  "entities": ["./src/modules/**/typeorm/entity/*.ts"],
+  "migrations": ["./src/shared/typeorm/migrations/*.ts"],
+  "cli": {
+    "entitiesDir": "./src/modules/**/typeorm/entity/*.ts",
+    "migrationsDir": "./src/shared/typeorm/migrations/*.ts"
+  }
+}
