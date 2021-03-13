@@ -6,6 +6,7 @@ import IUsersRepository from "../repositories/IUsersRepository";
 interface IRequest {
   name: string;
   email: string;
+  image: string;
   password: string;
   deliveryman: number;
 }
@@ -19,7 +20,6 @@ class CreateUserService {
   public async execute(data: IRequest): Promise<User | undefined> {
     const user = await this.usersRepository.create({
       ...data,
-      image: "clean",
     });
 
     return user;

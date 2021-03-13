@@ -5,6 +5,7 @@ import { classToClass } from "class-transformer";
 import ShowUserService from "../services/ShowUserService";
 import CreateUserService from "../services/CreateUserService";
 import DeleteUserService from "../services/DeleteUserService";
+import AppError from "../../../shared/errors/AppError";
 
 class UserController {
   public async index(req: Request, resp: Response): Promise<Response> {
@@ -20,14 +21,21 @@ class UserController {
 
     const { name, email, password, deliveryman } = req.body;
 
-    const user = await createUserService.execute({
-      name,
-      email,
-      password,
-      deliveryman,
-    });
+    try {
+      const image = req.file.filename;
 
-    return resp.status(201).send(classToClass(user));
+      const user = await createUserService.execute({
+        name,
+        email,
+        password,
+        deliveryman,
+        image,
+      });
+
+      return resp.status(201).send(classToClass(user));
+    } catch {
+      throw new AppError("Image not found!", 400);
+    }
   }
 
   public async delete(req: Request, resp: Response): Promise<Response> {

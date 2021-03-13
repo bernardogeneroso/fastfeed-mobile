@@ -14,11 +14,28 @@ class UserRepository implements IUsersRepository {
 
   public async findAll(): Promise<User[] | undefined> {
     try {
-      return this.ormRepository.find({
+      return await this.ormRepository.find({
         cache: true,
       });
     } catch {
       throw new AppError("Error on get users");
+    }
+  }
+
+  public async findUserImage(id: string): Promise<string> {
+    try {
+      const imageUser = await this.ormRepository.findOne({
+        cache: true,
+        where: { id },
+        select: ["image"],
+      });
+
+      if (!imageUser?.image)
+        throw new AppError("Error, user image not found", 404);
+
+      return imageUser.image;
+    } catch {
+      throw new AppError("Error on finding the user", 404);
     }
   }
 
@@ -27,8 +44,7 @@ class UserRepository implements IUsersRepository {
       const userCreate = this.ormRepository.create(data);
 
       return await this.ormRepository.save(userCreate);
-    } catch (err) {
-      console.log(err);
+    } catch {
       throw new AppError("Error on create user");
     }
   }
