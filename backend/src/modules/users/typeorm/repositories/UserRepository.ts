@@ -22,6 +22,15 @@ class UserRepository implements IUsersRepository {
     }
   }
 
+  public async findByEmail(email: string): Promise<User | undefined> {
+    try {
+      return await this.ormRepository.findOne({ where: { email } });
+    } catch (err) {
+      console.log(err);
+      throw new AppError("Error on get email", 404);
+    }
+  }
+
   public async findUserImage(id: string): Promise<string> {
     try {
       const imageUser = await this.ormRepository.findOne({

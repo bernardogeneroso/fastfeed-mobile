@@ -7,19 +7,19 @@ import CreateUserService from "../services/CreateUserService";
 import DeleteUserService from "../services/DeleteUserService";
 import AppError from "../../../shared/errors/AppError";
 
-class UserController {
+class UsersController {
   public async index(req: Request, resp: Response): Promise<Response> {
     const showUserService = container.resolve(ShowUserService);
 
     const users = await showUserService.execute();
 
-    return resp.status(201).send(classToClass(users));
+    return resp.json(classToClass(users));
   }
 
   public async create(req: Request, resp: Response): Promise<Response> {
-    const createUserService = container.resolve(CreateUserService);
-
     const { name, email, password, deliveryman } = req.body;
+
+    const createUserService = container.resolve(CreateUserService);
 
     try {
       const image = req.file.filename;
@@ -39,9 +39,9 @@ class UserController {
   }
 
   public async delete(req: Request, resp: Response): Promise<Response> {
-    const deleteUserService = container.resolve(DeleteUserService);
-
     const { id } = req.params;
+
+    const deleteUserService = container.resolve(DeleteUserService);
 
     await deleteUserService.execute(id);
 
@@ -49,4 +49,4 @@ class UserController {
   }
 }
 
-export default UserController;
+export default UsersController;

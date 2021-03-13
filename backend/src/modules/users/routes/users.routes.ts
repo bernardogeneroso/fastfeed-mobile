@@ -3,16 +3,18 @@ import multer from "multer";
 import path from "path";
 import { celebrate, Segments, Joi } from "celebrate";
 
-import UserController from "../controllers/UserController";
+import UsersController from "../controllers/UsersController";
+import SessionsController from "../controllers/SessionsController";
 import uploadConfig from "../../../config/multer";
 
 const usersRoutes = express.Router();
 
 const upload = multer(uploadConfig.multerStorageUsersAvatars);
 
-const userController = new UserController();
+const usersController = new UsersController();
+const sessionsController = new SessionsController();
 
-usersRoutes.get("/", userController.index);
+usersRoutes.get("/", usersController.index);
 usersRoutes.post(
   "/",
   upload.single("image"),
@@ -24,9 +26,19 @@ usersRoutes.post(
       deliveryman: Joi.string().required(),
     },
   }),
-  userController.create
+  usersController.create
 );
-usersRoutes.delete("/:id", userController.delete);
+usersRoutes.post(
+  "/session",
+  celebrate({
+    [Segments.BODY]: {
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    },
+  }),
+  sessionsController.create
+);
+usersRoutes.delete("/:id", usersController.delete);
 
 usersRoutes.use(
   "/image",
