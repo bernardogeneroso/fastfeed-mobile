@@ -4,8 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from "typeorm";
 import { Expose, Exclude } from "class-transformer";
+
+import Delivery from "../../../deliveries/typeorm/entity/Delivery";
 
 @Entity("users")
 export default class User {
@@ -26,8 +29,12 @@ export default class User {
   image: string;
 
   @Exclude()
-  @Column({ default: 0 })
-  deliveryman: number = 0;
+  @Column({
+    type: "enum",
+    enum: [0, 1],
+    default: 0,
+  })
+  deliveryman: 0 | 1;
 
   @Expose({ name: "deliveryman" })
   getComplete(): number | boolean | null {
@@ -46,6 +53,9 @@ export default class User {
 
     return `${process.env.APP_API_URL}/users/image/${this.image}`;
   }
+
+  @OneToMany(() => Delivery, (deliveries) => deliveries.deliveryman_id)
+  deliveries: Delivery;
 
   @CreateDateColumn() created_at: Date;
 

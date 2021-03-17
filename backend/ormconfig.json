@@ -1,7 +1,7 @@
 {
   "type": "postgres",
-  "host": "postgresql-20795-0.cloudclusters.net",
-  "port": 20795,
+  "host": "postgresql-23846-0.cloudclusters.net",
+  "port": 23846,
   "username": "postgres_admin",
   "password": "docker123",
   "database": "fastfeed",

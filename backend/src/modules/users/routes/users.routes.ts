@@ -3,6 +3,8 @@ import multer from "multer";
 import path from "path";
 import { celebrate, Segments, Joi } from "celebrate";
 
+import ensureAdmin from "../middlewares/ensureAdmin";
+
 import UsersController from "../controllers/UsersController";
 import SessionsController from "../controllers/SessionsController";
 import uploadConfig from "../../../config/multer";
@@ -14,9 +16,10 @@ const upload = multer(uploadConfig.multerStorageUsersAvatars);
 const usersController = new UsersController();
 const sessionsController = new SessionsController();
 
-usersRoutes.get("/", usersController.index);
+usersRoutes.get("/", ensureAdmin, usersController.index);
 usersRoutes.post(
   "/",
+  ensureAdmin,
   upload.single("image"),
   celebrate({
     [Segments.BODY]: {
@@ -38,7 +41,7 @@ usersRoutes.post(
   }),
   sessionsController.create
 );
-usersRoutes.delete("/:id", usersController.delete);
+usersRoutes.delete("/:id", ensureAdmin, usersController.delete);
 
 usersRoutes.use(
   "/image",
