@@ -14,7 +14,7 @@ interface IDeliveriesRepository {
     id: string,
     pickupDate: Date,
     deliveryman_id: string
-  ): Promise<Delivery | undefined>;
+  ): Promise<void>;
   create(data: IDelivery): Promise<Delivery>;
   delete(id: string): Promise<void>;
 }

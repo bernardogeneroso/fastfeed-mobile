@@ -21,21 +21,25 @@ class DeliveriesControllers {
   }
 
   public async pickup(req: Request, resp: Response): Promise<Response> {
-    const { id, date, deliveryman_id } = req.body;
+    const { id, date } = req.body;
+    // @ts-ignore
+    const user_id = req.user.id;
 
     const pickupDeliveryService = container.resolve(PickupDeliveryService);
 
     const delivery = await pickupDeliveryService.execute({
       id,
       date,
-      deliveryman_id,
+      deliveryman_id: user_id,
     });
 
     return resp.status(200).json(delivery);
   }
 
   public async delivered(req: Request, resp: Response): Promise<Response> {
-    const { id, date, deliveryman_id } = req.body;
+    const { id, date } = req.body;
+    // @ts-ignore
+    const user_id = req.user.id;
 
     const deliveredDeliveryService = container.resolve(
       DeliveredDeliveryService
@@ -44,7 +48,7 @@ class DeliveriesControllers {
     const delivery = await deliveredDeliveryService.execute({
       id,
       date,
-      deliveryman_id,
+      deliveryman_id: user_id,
     });
 
     return resp.status(200).json(delivery);

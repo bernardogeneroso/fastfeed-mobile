@@ -23,7 +23,6 @@ deliveriesRouter.patch(
     [Segments.BODY]: {
       id: Joi.string().uuid().required(),
       date: Joi.string().isoDate().required(),
-      deliveryman_id: Joi.string().uuid().required(),
     },
   }),
   deliveriesControllers.pickup
@@ -34,7 +33,6 @@ deliveriesRouter.patch(
     [Segments.BODY]: {
       id: Joi.string().uuid().required(),
       date: Joi.string().isoDate().required(),
-      deliveryman_id: Joi.string().uuid().required(),
     },
   }),
   deliveriesControllers.delivered

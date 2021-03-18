@@ -81,7 +81,7 @@ class DeliveryRepository implements IDeliveriesRepository {
     id: string,
     date: Date,
     deliveryman_id: string
-  ): Promise<Delivery | undefined> {
+  ): Promise<void> {
     try {
       await this.ormRepository
         .createQueryBuilder()
@@ -92,8 +92,6 @@ class DeliveryRepository implements IDeliveriesRepository {
         .where("id = :id", { id })
         .andWhere("deliveryman_id = :deliveryman_id", { deliveryman_id })
         .execute();
-
-      return await this.ormRepository.findOne({ id });
     } catch {
       throw new AppError("Error on add delivery date");
     }
