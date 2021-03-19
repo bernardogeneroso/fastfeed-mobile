@@ -17,6 +17,15 @@ deliveriesRouter.get(
   }),
   deliveriesControllers.index
 );
+deliveriesRouter.get(
+  "/delivered/:deliveryman_id",
+  celebrate({
+    [Segments.PARAMS]: {
+      deliveryman_id: Joi.string().uuid().required(),
+    },
+  }),
+  deliveriesControllers.delivereds
+);
 deliveriesRouter.patch(
   "/pickup",
   celebrate({

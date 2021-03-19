@@ -5,6 +5,7 @@ interface IDeliveriesRepository {
   findAll(deliveryman_id: string): Promise<Delivery[] | undefined>;
   findOne(id: string): Promise<Delivery | undefined>;
   findDeliversToday(deliveryman_id: string): Promise<Delivery[] | undefined>;
+  findDelivered(deliveryman_id: string): Promise<Delivery[] | undefined>;
   pickupDate(
     id: string,
     pickupDate: Date,

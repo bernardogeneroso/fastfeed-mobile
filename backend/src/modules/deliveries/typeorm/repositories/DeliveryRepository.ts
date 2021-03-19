@@ -1,4 +1,4 @@
-import { getRepository, Raw, Repository } from "typeorm";
+import { getRepository, IsNull, Not, Raw, Repository } from "typeorm";
 import { format, parseISO } from "date-fns";
 
 import IDeliveriesRepository from "../../repositories/IDeliveriesRepository";
@@ -19,7 +19,7 @@ class DeliveryRepository implements IDeliveriesRepository {
     try {
       return await this.ormRepository.find({
         cache: true,
-        where: { deliveryman_id },
+        where: { deliveryman_id, end_date: IsNull() },
       });
     } catch {
       throw new AppError("Error on get deliveries of deliveryman");
@@ -52,6 +52,19 @@ class DeliveryRepository implements IDeliveriesRepository {
       });
     } catch {
       throw new AppError("Error on get delivers of deliveryman today");
+    }
+  }
+
+  public async findDelivered(
+    deliveryman_id: string
+  ): Promise<Delivery[] | undefined> {
+    try {
+      return await this.ormRepository.find({
+        deliveryman_id,
+        end_date: Not(IsNull()),
+      });
+    } catch {
+      throw new AppError("Error on find delivereds");
     }
   }
 

@@ -6,6 +6,7 @@ import CreateDeliveryService from "../services/CreateDeliveryService";
 import DeleteDeliveryService from "../services/DeleteDeliveryService";
 import PickupDeliveryService from "../services/PickupDeliveryService";
 import DeliveredDeliveryService from "../services/DeliveredDeliveryService";
+import DeliveredService from "../services/DeliveredService";
 
 class DeliveriesControllers {
   public async index(req: Request, resp: Response): Promise<Response> {
@@ -18,6 +19,18 @@ class DeliveriesControllers {
     });
 
     return resp.status(200).json(deliveries);
+  }
+
+  public async delivereds(req: Request, resp: Response): Promise<Response> {
+    const { deliveryman_id } = req.params;
+
+    const deliveredService = container.resolve(DeliveredService);
+
+    const deliveriesDelivired = await deliveredService.execute({
+      deliveryman_id,
+    });
+
+    return resp.status(200).json(deliveriesDelivired);
   }
 
   public async pickup(req: Request, resp: Response): Promise<Response> {

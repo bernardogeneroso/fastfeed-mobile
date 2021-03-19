@@ -9,12 +9,13 @@ import {
   KeyboardEventName,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import {useForm, Controller} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
 import * as Animatable from 'react-native-animatable';
 import * as Yup from 'yup';
 
 import Header from '../../../components/Auth/Header';
 import {AppRoutesScreens} from '../../../routes/app.routes';
-import getValidationErrors from '../../../utils/getValidationErrors';
 
 import {
   Container,
@@ -41,19 +42,11 @@ import {
 
 interface FormProps {
   email: {
-    value: string;
     focusable: boolean;
-    error: {
-      message: string | undefined;
-    };
   };
   password: {
-    value: string;
     focusable: boolean;
     visible: boolean;
-    error: {
-      message: string | undefined;
-    };
   };
   checkbox: boolean;
 }
@@ -63,27 +56,35 @@ interface KeyboardListenerProps {
   hide: KeyboardEventName;
 }
 
+interface DataForm {
+  email: string;
+  password: string;
+}
+
+const schema = Yup.object().shape({
+  email: Yup.string()
+    .required('O campo de e-mail é obrigatório')
+    .email('Escreva o e-mail válido'),
+  password: Yup.string().required('O campo da password é obrigatório'),
+});
+
 const Login = () => {
   const navigation = useNavigation<AppRoutesScreens>();
+  const {control, handleSubmit, errors} = useForm({
+    resolver: yupResolver(schema),
+  });
 
-  const formRef = useRef(null);
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
 
   const [keyboardShow, setKeyboardShow] = useState<boolean>(false);
   const [form, setForm] = useState<FormProps>({
     email: {
-      value: '',
       focusable: false,
-      error: {
-        message: undefined,
-      },
     },
     password: {
-      value: '',
       focusable: false,
       visible: false,
-      error: {
-        message: undefined,
-      },
     },
     checkbox: false,
   });
@@ -128,19 +129,6 @@ const Login = () => {
     }));
   }, []);
 
-  const handleChangeInputValue = useCallback(
-    (type: 'email' | 'password', value: string) => {
-      setForm((state) => ({
-        ...state,
-        [type]: {
-          ...state[type],
-          value,
-        },
-      }));
-    },
-    [],
-  );
-
   const handleToggleChangeFocusable = useCallback(
     (type: 'email' | 'password') => {
       setForm((state) => ({
@@ -148,22 +136,6 @@ const Login = () => {
         [type]: {
           ...state[type],
           focusable: !state[type].focusable,
-        },
-      }));
-    },
-    [],
-  );
-
-  const handleSetMesssageErrorForm = useCallback(
-    (type: 'email' | 'password', message: string) => {
-      setForm((state) => ({
-        ...state,
-        [type]: {
-          ...state[type],
-          error: {
-            ...state[type].error,
-            message,
-          },
         },
       }));
     },
@@ -182,36 +154,15 @@ const Login = () => {
     navigation.navigate('ForgetPassword');
   }, [navigation]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleOnSubmit = useCallback(async (data: DataForm) => {
     try {
-      const schema = Yup.object().shape({
-        email: Yup.string()
-          .required('O campo de e-mail é obrigatório')
-          .email('Escreva o e-mail válido'),
-        password: Yup.string().required('O campo da password é obrigatório'),
-      });
+      const {email, password} = data;
 
-      const data = {
-        email: form.email.value,
-        password: form.password.value,
-      };
-
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+      console.log(data);
     } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
-
-        handleSetMesssageErrorForm('email', errors.email);
-        handleSetMesssageErrorForm('password', errors.password);
-
-        return;
-      }
-
       Alert.alert('Error in authentication');
     }
-  }, [form.email.value, form.password.value, handleSetMesssageErrorForm]);
+  }, []);
 
   return (
     <Container
@@ -246,7 +197,7 @@ const Login = () => {
             </InformationText>
           </Content>
 
-          <Form ref={formRef}>
+          <Form>
             <ContainerInput focus={!!form.email.focusable}>
               <Icon
                 name="mail"
@@ -254,21 +205,38 @@ const Login = () => {
                 size={20}
               />
               <Divider />
-              <Input
-                autoCorrect={false}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                returnKeyType="next"
-                placeholder="E-mail"
-                onChangeText={(value) => handleChangeInputValue('email', value)}
-                onFocus={() => handleToggleChangeFocusable('email')}
-                onBlur={() => handleToggleChangeFocusable('email')}
-                defaultValue={form.email.value}
+
+              <Controller
+                control={control}
+                onFocus={() => {
+                  // @ts-ignore
+                  emailInputRef.current && emailInputRef.current.focus();
+                }}
+                render={(props) => (
+                  <Input
+                    {...props}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    returnKeyType="next"
+                    placeholder="E-mail"
+                    onChangeText={(value) => props.onChange(value)}
+                    onFocus={() => handleToggleChangeFocusable('email')}
+                    onBlur={() => {
+                      handleToggleChangeFocusable('email');
+                      props.onBlur();
+                    }}
+                    ref={emailInputRef}
+                  />
+                )}
+                name="email"
+                rules={{required: true}}
+                defaultValue=""
               />
             </ContainerInput>
-            {form.email.error.message && (
+            {errors.email?.message && (
               <ContainerError>
-                <ErrorText>{form.email.error.message}</ErrorText>
+                <ErrorText>{errors.email?.message}</ErrorText>
               </ContainerError>
             )}
 
@@ -279,16 +247,30 @@ const Login = () => {
                 size={20}
               />
               <Divider />
-              <Input
-                secureTextEntry={!form.password.visible}
-                returnKeyType="send"
-                placeholder="Password"
-                onChangeText={(value) =>
-                  handleChangeInputValue('password', value)
-                }
-                onFocus={() => handleToggleChangeFocusable('password')}
-                onBlur={() => handleToggleChangeFocusable('password')}
-                defaultValue={form.password.value}
+              <Controller
+                control={control}
+                onFocus={() => {
+                  // @ts-ignore
+                  passwordInputRef.current && passwordInputRef.current.focus();
+                }}
+                render={(props) => (
+                  <Input
+                    {...props}
+                    secureTextEntry={!form.password.visible}
+                    returnKeyType="send"
+                    placeholder="Password"
+                    onChangeText={(value) => props.onChange(value)}
+                    onFocus={() => handleToggleChangeFocusable('password')}
+                    onBlur={() => {
+                      handleToggleChangeFocusable('password');
+                      props.onBlur();
+                    }}
+                    ref={passwordInputRef}
+                  />
+                )}
+                name="password"
+                rules={{required: true}}
+                defaultValue=""
               />
               <ContainerEye onPress={handleToggleVisiblePassword}>
                 {form.password.visible ? (
@@ -298,9 +280,9 @@ const Login = () => {
                 )}
               </ContainerEye>
             </ContainerInput>
-            {form.password.error.message && (
+            {errors.password?.message && (
               <ContainerError>
-                <ErrorText>{form.password.error.message}</ErrorText>
+                <ErrorText>{errors.password?.message}</ErrorText>
               </ContainerError>
             )}
 
@@ -325,7 +307,8 @@ const Login = () => {
               </ButtonForgetPassword>
             </ContainerSettingsForm>
 
-            <ButtonSubmit onPress={handleSubmit}>
+            {/* @ts-ignore  */}
+            <ButtonSubmit onPress={handleSubmit(handleOnSubmit)}>
               <ButtonSubmitText>Entrar</ButtonSubmitText>
             </ButtonSubmit>
           </Form>
