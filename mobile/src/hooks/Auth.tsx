@@ -1,4 +1,10 @@
-import React, {createContext, useContext, useState, useCallback} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from '../services/api';
@@ -21,6 +27,7 @@ interface SignInCredentials {
 
 interface AuthContextData {
   user: User;
+  loading: boolean;
   signIn(data: SignInCredentials, remember: boolean): Promise<void>;
   signOut(): void;
 }
@@ -29,12 +36,32 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const AuthProvider: React.FC = ({children}) => {
   const [data, setData] = useState<AuthState>({} as AuthState);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStoragedData(): Promise<void> {
+      const [token, user] = await AsyncStorage.multiGet([
+        'FastFeed:token',
+        'FastFeed:user',
+      ]);
+
+      if (token[1] && user[1]) {
+        api.defaults.headers.authorization = `Bearer ${token[1]}`;
+
+        setData({token: token[1], user: JSON.parse(user[1])});
+      }
+
+      setLoading(false);
+    }
+
+    loadStoragedData();
+  }, []);
 
   const signIn = useCallback(
     async ({email, password}: SignInCredentials, remember: boolean) => {
       const {
         data: {user, token},
-      } = await api.post('/user/session', {
+      } = await api.post('/users/session', {
         email,
         password,
       });
@@ -76,6 +103,7 @@ const AuthProvider: React.FC = ({children}) => {
         user: data.user,
         signIn,
         signOut,
+        loading,
       }}>
       {children}
     </AuthContext.Provider>

@@ -1,5 +1,5 @@
 import { getRepository, IsNull, Not, Raw, Repository } from "typeorm";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 import IDeliveriesRepository from "../../repositories/IDeliveriesRepository";
 import Delivery from "../entity/Delivery";
@@ -60,8 +60,14 @@ class DeliveryRepository implements IDeliveriesRepository {
   ): Promise<Delivery[] | undefined> {
     try {
       return await this.ormRepository.find({
-        deliveryman_id,
-        end_date: Not(IsNull()),
+        cache: true,
+        where: {
+          deliveryman_id,
+          end_date: Not(IsNull()),
+        },
+        order: {
+          end_date: "DESC",
+        },
       });
     } catch {
       throw new AppError("Error on find delivereds");

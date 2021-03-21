@@ -10,14 +10,15 @@ import Auth from './auth.routes';
 
 const Stack = createStackNavigator();
 
-type AuthScreens = {
+export type AuthScreens = {
   Login: undefined;
   ForgetPassword: undefined;
 };
 
 type StackNavigatorScreens = {
   Splash: undefined;
-  Auth: AuthScreens;
+  Auth: undefined;
+  AppHome: undefined;
 };
 
 export type AppRoutesScreens = StackNavigationProp<StackNavigatorScreens>;

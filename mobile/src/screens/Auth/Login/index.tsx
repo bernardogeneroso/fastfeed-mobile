@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardEventName,
 } from 'react-native';
+import {useAuth} from '../../../hooks/Auth';
 import Icon from 'react-native-vector-icons/Feather';
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
@@ -69,6 +70,7 @@ const schema = Yup.object().shape({
 });
 
 const Login = () => {
+  const {signIn} = useAuth();
   const navigation = useNavigation<AppRoutesScreens>();
   const {control, handleSubmit, errors} = useForm({
     resolver: yupResolver(schema),
@@ -154,15 +156,19 @@ const Login = () => {
     navigation.navigate('ForgetPassword');
   }, [navigation]);
 
-  const handleOnSubmit = useCallback(async (data: DataForm) => {
-    try {
-      const {email, password} = data;
+  const handleOnSubmit = useCallback(
+    async (data: DataForm) => {
+      try {
+        const {email, password} = data;
+        const checkbox = form.checkbox;
 
-      console.log(data);
-    } catch (err) {
-      Alert.alert('Error in authentication');
-    }
-  }, []);
+        await signIn({email, password}, checkbox);
+      } catch (err) {
+        Alert.alert('Erro na autenticação');
+      }
+    },
+    [form.checkbox, signIn],
+  );
 
   return (
     <Container
@@ -269,7 +275,7 @@ const Login = () => {
                   />
                 )}
                 name="password"
-                rules={{required: true}}
+                rules={{required: true, minLength: 6}}
                 defaultValue=""
               />
               <ContainerEye onPress={handleToggleVisiblePassword}>
@@ -297,6 +303,7 @@ const Login = () => {
                     padding: 0,
                   }}
                 />
+
                 <CheckBoxText checked={form.checkbox}>Lembrar-me</CheckBoxText>
               </ContentCheckBox>
 
