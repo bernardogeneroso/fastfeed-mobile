@@ -2,10 +2,16 @@ import Delivery from "../typeorm/entity/Delivery";
 import IDelivery from "../schemas/IDelivery";
 
 interface IDeliveriesRepository {
-  findAll(deliveryman_id: string): Promise<Delivery[] | undefined>;
+  findAll(
+    deliveryman_id: string,
+    search: string
+  ): Promise<Delivery[] | undefined>;
   findOne(id: string): Promise<Delivery | undefined>;
   findDeliversToday(deliveryman_id: string): Promise<Delivery[] | undefined>;
-  findDelivered(deliveryman_id: string): Promise<Delivery[] | undefined>;
+  findDelivered(
+    deliveryman_id: string,
+    search: string
+  ): Promise<Delivery[] | undefined>;
   pickupDate(
     id: string,
     pickupDate: Date,

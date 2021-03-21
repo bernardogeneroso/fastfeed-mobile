@@ -6,6 +6,7 @@ import IDeliveriesRepository from "../repositories/IDeliveriesRepository";
 
 interface IRequest {
   deliveryman_id: string;
+  search: string;
 }
 
 interface DeliveriesFormated {
@@ -22,9 +23,11 @@ class DeliveredService {
 
   public async execute({
     deliveryman_id,
+    search,
   }: IRequest): Promise<DeliveriesFormated[] | undefined> {
     const deliveriesDelivered = await this.deliveriesRepository.findDelivered(
-      deliveryman_id
+      deliveryman_id,
+      search
     );
 
     const deliveriesFormated: DeliveriesFormated[] = [];

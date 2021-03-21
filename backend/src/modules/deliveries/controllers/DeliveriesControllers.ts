@@ -11,11 +11,13 @@ import DeliveredService from "../services/DeliveredService";
 class DeliveriesControllers {
   public async index(req: Request, resp: Response): Promise<Response> {
     const { deliveryman_id } = req.params;
+    const { search } = req.query;
 
     const showDeliveriesService = container.resolve(ShowDeliveriesService);
 
     const deliveries = await showDeliveriesService.execute({
       deliveryman_id,
+      search: search ? search.toString() : "",
     });
 
     return resp.status(200).json(deliveries);
@@ -23,11 +25,13 @@ class DeliveriesControllers {
 
   public async delivereds(req: Request, resp: Response): Promise<Response> {
     const { deliveryman_id } = req.params;
+    const { search } = req.query;
 
     const deliveredService = container.resolve(DeliveredService);
 
     const deliveriesDelivired = await deliveredService.execute({
       deliveryman_id,
+      search: search ? search.toString() : "",
     });
 
     return resp.status(200).json(deliveriesDelivired);

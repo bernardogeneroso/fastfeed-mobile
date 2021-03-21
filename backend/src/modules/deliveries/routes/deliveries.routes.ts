@@ -14,6 +14,9 @@ deliveriesRouter.get(
     [Segments.PARAMS]: {
       deliveryman_id: Joi.string().uuid().required(),
     },
+    [Segments.QUERY]: {
+      search: Joi.string(),
+    },
   }),
   deliveriesControllers.index
 );
@@ -22,6 +25,9 @@ deliveriesRouter.get(
   celebrate({
     [Segments.PARAMS]: {
       deliveryman_id: Joi.string().uuid().required(),
+    },
+    [Segments.QUERY]: {
+      search: Joi.string(),
     },
   }),
   deliveriesControllers.delivereds
