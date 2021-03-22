@@ -1,5 +1,6 @@
 import styled, {css} from 'styled-components/native';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ContentSearchProps {
   modalSearch: boolean;
 }

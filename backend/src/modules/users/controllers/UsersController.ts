@@ -32,7 +32,7 @@ class UsersController {
         image,
       });
 
-      return resp.status(201).send(classToClass(user));
+      return resp.status(201).json(classToClass(user));
     } catch {
       throw new AppError("Image not found!", 400);
     }

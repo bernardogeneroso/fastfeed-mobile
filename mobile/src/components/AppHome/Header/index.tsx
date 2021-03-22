@@ -1,9 +1,13 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {StyleSheet} from 'react-native';
 import IconsFeather from 'react-native-vector-icons/Feather';
 import IconsIonicons from 'react-native-vector-icons/Ionicons';
 
 import {useAuth} from '../../../hooks/Auth';
+import {
+  useDeliveries,
+  FilterDeliveries,
+} from '../../../hooks/DeliveriesManager';
 
 import {
   Container,
@@ -24,7 +28,7 @@ import {
 
 const Header = () => {
   const {user, signOut} = useAuth();
-  const [modalSearch, setModalSearch] = useState<boolean>(true);
+  const {handleHeaderFilterValue, headerFilterDeliveries} = useDeliveries();
 
   return (
     <Container>
@@ -49,27 +53,24 @@ const Header = () => {
       </ContainerPlace>
 
       <ContainerSearch style={style.viewShadow}>
-        <ContentSearch modalSearch={modalSearch}>
+        <ContentSearch modalSearch={!!headerFilterDeliveries}>
           <Input
             autoCapitalize="none"
             keyboardType="web-search"
             returnKeyType="search"
             placeholder="Filtrar por rua"
+            onChangeText={(text) => handleHeaderFilterValue(text)}
           />
           <IconsIonicons name="search" size={22} color="#BEBCCC" />
         </ContentSearch>
 
-        {modalSearch && (
+        {headerFilterDeliveries && (
           <ContainerModal>
-            <ContentDeliverie>
-              <StreetText>Jardim América</StreetText>
-            </ContentDeliverie>
-            <ContentDeliverie>
-              <StreetText>Jardim América</StreetText>
-            </ContentDeliverie>
-            <ContentDeliverie>
-              <StreetText>Jardim América</StreetText>
-            </ContentDeliverie>
+            {headerFilterDeliveries.map((filterDeliverie: FilterDeliveries) => (
+              <ContentDeliverie key={filterDeliverie.id}>
+                <StreetText>{filterDeliverie.address}</StreetText>
+              </ContentDeliverie>
+            ))}
           </ContainerModal>
         )}
       </ContainerSearch>

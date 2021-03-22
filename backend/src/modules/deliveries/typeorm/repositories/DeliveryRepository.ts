@@ -15,7 +15,7 @@ class DeliveryRepository implements IDeliveriesRepository {
 
   public async findAll(
     deliveryman_id: string,
-    search: string | undefined
+    search: string
   ): Promise<Delivery[] | undefined> {
     try {
       return await this.ormRepository.find({
@@ -23,7 +23,9 @@ class DeliveryRepository implements IDeliveriesRepository {
         where: {
           deliveryman_id,
           end_date: IsNull(),
-          address: Like(`%${search}%`),
+          address: Raw(
+            (value) => `LOWER(${value}) LIKE '%${search.toLowerCase()}%'`
+          ),
         },
       });
     } catch {
@@ -70,7 +72,9 @@ class DeliveryRepository implements IDeliveriesRepository {
         where: {
           deliveryman_id,
           end_date: Not(IsNull()),
-          address: Like(`%${search}%`),
+          address: Raw(
+            (value) => `LOWER(${value}) LIKE '%${search.toLowerCase()}%'`
+          ),
         },
         order: {
           end_date: "DESC",

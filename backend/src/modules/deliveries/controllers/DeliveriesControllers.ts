@@ -92,7 +92,7 @@ class DeliveriesControllers {
       deliveryman_id,
     });
 
-    return resp.status(201).send(delivery);
+    return resp.status(201).json(delivery);
   }
 
   public async delete(req: Request, resp: Response): Promise<Response> {
