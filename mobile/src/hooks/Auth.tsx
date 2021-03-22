@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from '../services/api';
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -55,6 +55,19 @@ const AuthProvider: React.FC = ({children}) => {
     }
 
     loadStoragedData();
+  }, []);
+
+  useEffect(() => {
+    api.interceptors.response.use(
+      (res) => res,
+      (err) => {
+        if (err.response.status === 401) {
+          setData({} as AuthState);
+        }
+
+        throw new Error(err.response.data);
+      },
+    );
   }, []);
 
   const signIn = useCallback(

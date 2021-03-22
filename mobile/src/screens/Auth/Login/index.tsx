@@ -8,7 +8,7 @@ import {
   Alert,
   KeyboardEventName,
 } from 'react-native';
-import {useAuth} from '../../../hooks/Auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Feather';
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
@@ -17,6 +17,7 @@ import * as Yup from 'yup';
 
 import Header from '../../../components/Auth/Header';
 import {AppRoutesScreens} from '../../../routes/app.routes';
+import {useAuth} from '../../../hooks/Auth';
 
 import {
   Container,
@@ -72,7 +73,7 @@ const schema = Yup.object().shape({
 const Login = () => {
   const {signIn} = useAuth();
   const navigation = useNavigation<AppRoutesScreens>();
-  const {control, handleSubmit, errors} = useForm({
+  const {control, handleSubmit, errors, setValue} = useForm({
     resolver: yupResolver(schema),
   });
 
@@ -120,6 +121,26 @@ const Login = () => {
       });
     };
   }, [keyboardListener.hide, keyboardListener.show]);
+
+  useEffect(() => {
+    AsyncStorage.multiGet([
+      'FastFeed:user-login',
+      'FastFeed:user-remember',
+    ]).then((response) => {
+      if (!response[0][1] || !response[1][1]) return;
+
+      const {email, password} = JSON.parse(response[0][1]);
+      const remember = JSON.parse(response[0][1]);
+
+      setValue('email', email);
+      setValue('password', password);
+
+      setForm((value) => ({
+        ...value,
+        checkbox: remember,
+      }));
+    });
+  }, [setValue]);
 
   const handleToggleVisiblePassword = useCallback(() => {
     setForm((state) => ({
@@ -237,7 +258,6 @@ const Login = () => {
                 )}
                 name="email"
                 rules={{required: true}}
-                defaultValue=""
               />
             </ContainerInput>
             {errors.email?.message && (
@@ -276,7 +296,6 @@ const Login = () => {
                 )}
                 name="password"
                 rules={{required: true, minLength: 6}}
-                defaultValue=""
               />
               <ContainerEye onPress={handleToggleVisiblePassword}>
                 {form.password.visible ? (
